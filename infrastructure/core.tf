@@ -1,5 +1,6 @@
 variable "project" { default = "canary" }
 variable "AWS_REGION" { default = "eu-west-1" }
+variable "AWS_ACCOUNT_ID" { }
 
 provider "aws" {
   region = "${var.AWS_REGION}"
@@ -82,4 +83,32 @@ resource "aws_lambda_function" "lambda" {
   runtime            = "java8"
   timeout            = 100
   memory_size        = 256
+}
+
+
+resource "aws_lambda_permission" "api_gateway_permission" {
+  function_name = "${aws_lambda_function.lambda.arn}"
+  action = "lambda:InvokeFunction"
+  statement_id = "AllowExecutionFromApiGateway"
+  principal = "apigateway.amazonaws.com"
+}
+
+resource "aws_api_gateway_rest_api" "rest_api" {
+  name = "${var.project}"
+}
+
+resource "aws_api_gateway_method" "method" {
+  http_method = "ANY"
+  authorization = "NONE"
+  rest_api_id = "${aws_api_gateway_rest_api.rest_api.id}"
+  resource_id = "${aws_api_gateway_rest_api.rest_api.root_resource_id}"
+}
+
+resource "aws_api_gateway_integration" "integration" {
+  type = "AWS_PROXY"
+  integration_http_method = "POST"
+  rest_api_id = "${aws_api_gateway_rest_api.rest_api.id}"
+  resource_id = "${aws_api_gateway_rest_api.rest_api.root_resource_id}"
+  http_method = "${aws_api_gateway_method.method.http_method}"
+  uri = "arn:aws:apigateway:${var.AWS_REGION}:lambda:path/2015-03-31/functions/arn:aws:lambda:${var.AWS_REGION}:${var.AWS_ACCOUNT_ID}:function:${aws_lambda_function.lambda.function_name}/invocations"
 }
