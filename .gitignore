@@ -1,3 +1,5 @@
+# Clojure ignores
+
 pom.xml
 pom.xml.asc
 *.jar
@@ -12,3 +14,20 @@ pom.xml.asc
 .lein-failures
 .nrepl-port
 .cpcache/
+
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# Crash log files
+crash.log
+
+# Ignore override files as they are usually used to override resources locally and so
+# are not checked in
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
