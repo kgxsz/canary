@@ -1,24 +1,27 @@
+# Variables
 variable "project" { default = "canary" }
 variable "AWS_REGION" { default = "eu-west-1" }
-variable "AWS_ACCOUNT_ID" { }
 
+# Provider
 provider "aws" {
   region = "${var.AWS_REGION}"
 }
 
-resource "aws_s3_bucket" "uberjar_bucket" {
+# S3
+resource "aws_s3_bucket" "bucket" {
   bucket = "api.${var.project}.keigo.io"
   acl = "private"
 }
 
-resource "aws_s3_bucket_object" "uberjar_file" {
+resource "aws_s3_bucket_object" "uberjar" {
   bucket = "api.${var.project}.keigo.io"
-  depends_on = ["aws_s3_bucket.uberjar_bucket"]
+  depends_on = ["aws_s3_bucket.bucket"]
   key = "${var.project}.jar"
   source = "target/${var.project}.jar"
   etag = "${filemd5("target/${var.project}.jar")}"
 }
 
+# Lambda
 resource "aws_iam_policy" "lambda_policy" {
   name        = "${var.project}"
   path        = "/"
@@ -69,11 +72,11 @@ resource "aws_iam_policy_attachment" "lambda_policy_attachment" {
 
 
 resource "aws_lambda_function" "lambda" {
-  depends_on = ["aws_s3_bucket.uberjar_bucket",
+  depends_on = ["aws_s3_bucket.bucket",
                 "aws_iam_role.lambda_role",
-                "aws_s3_bucket_object.uberjar_file",
+                "aws_s3_bucket_object.uberjar",
                 "aws_iam_policy.lambda_policy"]
-  s3_bucket          = "${aws_s3_bucket.uberjar_bucket.bucket}"
+  s3_bucket          = "${aws_s3_bucket.bucket.bucket}"
   s3_key             = "${var.project}.jar"
   function_name      = "${var.project}"
   description        = "API for ${var.project}.keigo.io"
@@ -93,22 +96,66 @@ resource "aws_lambda_permission" "api_gateway_permission" {
   principal = "apigateway.amazonaws.com"
 }
 
-resource "aws_api_gateway_rest_api" "rest_api" {
+# API Gateway
+resource "aws_api_gateway_rest_api" "api" {
   name = "${var.project}"
 }
 
-resource "aws_api_gateway_method" "method" {
-  http_method = "ANY"
-  authorization = "NONE"
-  rest_api_id = "${aws_api_gateway_rest_api.rest_api.id}"
-  resource_id = "${aws_api_gateway_rest_api.rest_api.root_resource_id}"
+resource "aws_api_gateway_stage" "stage" {
+  stage_name    = "default"
+  rest_api_id   = "${aws_api_gateway_rest_api.api.id}"
+  deployment_id = "${aws_api_gateway_deployment.api_deployment.id}"
 }
 
-resource "aws_api_gateway_integration" "integration" {
-  type = "AWS_PROXY"
+resource "aws_api_gateway_resource" "query" {
+  rest_api_id = "${aws_api_gateway_rest_api.api.id}"
+  parent_id   = "${aws_api_gateway_rest_api.api.root_resource_id}"
+  path_part   = "query"
+}
+
+resource "aws_api_gateway_method" "query" {
+  rest_api_id   = "${aws_api_gateway_rest_api.api.id}"
+  resource_id   = "${aws_api_gateway_resource.query.id}"
+  http_method   = "POST"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_resource" "command" {
+  rest_api_id = "${aws_api_gateway_rest_api.api.id}"
+  parent_id   = "${aws_api_gateway_rest_api.api.root_resource_id}"
+  path_part   = "command"
+}
+
+resource "aws_api_gateway_method" "command" {
+  rest_api_id   = "${aws_api_gateway_rest_api.api.id}"
+  resource_id   = "${aws_api_gateway_resource.command.id}"
+  http_method   = "POST"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "lambda_query_integration" {
+  rest_api_id = "${aws_api_gateway_rest_api.api.id}"
+  resource_id = "${aws_api_gateway_method.query.resource_id}"
+  http_method = "${aws_api_gateway_method.query.http_method}"
   integration_http_method = "POST"
-  rest_api_id = "${aws_api_gateway_rest_api.rest_api.id}"
-  resource_id = "${aws_api_gateway_rest_api.rest_api.root_resource_id}"
-  http_method = "${aws_api_gateway_method.method.http_method}"
-  uri = "arn:aws:apigateway:${var.AWS_REGION}:lambda:path/2015-03-31/functions/arn:aws:lambda:${var.AWS_REGION}:${var.AWS_ACCOUNT_ID}:function:${aws_lambda_function.lambda.function_name}/invocations"
+  type                    = "AWS_PROXY"
+  uri                     = "${aws_lambda_function.lambda.invoke_arn}"
+}
+
+resource "aws_api_gateway_integration" "lambda_command_integration" {
+  rest_api_id = "${aws_api_gateway_rest_api.api.id}"
+  resource_id = "${aws_api_gateway_method.command.resource_id}"
+  http_method = "${aws_api_gateway_method.command.http_method}"
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = "${aws_lambda_function.lambda.invoke_arn}"
+}
+
+resource "aws_api_gateway_deployment" "api_deployment" {
+  depends_on = [
+    "aws_api_gateway_integration.lambda_query_integration",
+    "aws_api_gateway_integration.lambda_command_integration",
+  ]
+  rest_api_id = "${aws_api_gateway_rest_api.api.id}"
+  stage_name = "default"
 }
