@@ -159,3 +159,23 @@ resource "aws_api_gateway_deployment" "api_deployment" {
   rest_api_id = "${aws_api_gateway_rest_api.api.id}"
   stage_name = "default"
 }
+
+# DynamoDB
+resource "aws_dynamodb_table" "table" {
+  name           = "${var.project}"
+  billing_mode   = "PROVISIONED"
+  read_capacity  = 1
+  write_capacity = 1
+  hash_key       = "partition"
+  range_key      = "sort"
+
+  attribute {
+    name = "partition"
+    type = "S"
+  }
+
+  attribute {
+    name = "sort"
+    type = "N"
+  }
+}
