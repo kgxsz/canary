@@ -101,12 +101,6 @@ resource "aws_api_gateway_rest_api" "api" {
   name = "${var.project}"
 }
 
-resource "aws_api_gateway_stage" "stage" {
-  stage_name    = "default"
-  rest_api_id   = "${aws_api_gateway_rest_api.api.id}"
-  deployment_id = "${aws_api_gateway_deployment.api_deployment.id}"
-}
-
 resource "aws_api_gateway_resource" "query" {
   rest_api_id = "${aws_api_gateway_rest_api.api.id}"
   parent_id   = "${aws_api_gateway_rest_api.api.root_resource_id}"
@@ -158,6 +152,12 @@ resource "aws_api_gateway_deployment" "api_deployment" {
   ]
   rest_api_id = "${aws_api_gateway_rest_api.api.id}"
   stage_name = "default"
+}
+
+resource "aws_api_gateway_base_path_mapping" "mapping" {
+  api_id      = "${aws_api_gateway_rest_api.api.id}"
+  stage_name  = "${aws_api_gateway_deployment.api_deployment.stage_name}"
+  domain_name =  "api.${var.project}.keigo.io"
 }
 
 # DynamoDB
