@@ -33,10 +33,26 @@ resource "aws_iam_policy" "lambda_policy" {
   "Statement": [
     {
       "Action": [
-        "logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
       ],
       "Effect": "Allow",
-      "Resource": "arn:aws:logs:${var.AWS_REGION}:*:*"
+      "Resource": "arn:aws:logs:${var.AWS_REGION}:*:log-group:/aws/lambda/${var.project}:*"
+    },
+    {
+      "Action": [
+        "dynamodb:DescribeTable",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:DeleteItem"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:dynamodb:${var.AWS_REGION}:*:table/${var.project}"
     }
   ]
 }
@@ -81,11 +97,11 @@ resource "aws_lambda_function" "lambda" {
   function_name      = "${var.project}"
   description        = "API for ${var.project}.keigo.io"
   role               = "${aws_iam_role.lambda_role.arn}"
-  handler            = "${var.project}.core.LambdaFunction"
+  handler            = "${var.project}.Handler"
   source_code_hash   = "${base64sha256("target/${var.project}.jar")}"
   runtime            = "java8"
   timeout            = 100
-  memory_size        = 256
+  memory_size        = 512
 }
 
 
