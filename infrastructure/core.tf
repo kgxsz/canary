@@ -172,7 +172,7 @@ resource "aws_api_gateway_method_response" "command_options_method_response" {
     "method.response.header.Access-Control-Allow-Methods" = false,
     "method.response.header.Access-Control-Allow-Origin" = false
   }
-  depends_on = ["aws_api_gateway_method.query_options_method"]
+  depends_on = ["aws_api_gateway_method.command_options_method"]
 }
 
 resource "aws_api_gateway_integration" "query_options_integration" {
