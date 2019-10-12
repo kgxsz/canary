@@ -118,56 +118,177 @@ resource "aws_api_gateway_rest_api" "api" {
 }
 
 resource "aws_api_gateway_resource" "query" {
+  path_part   = "query"
   rest_api_id = "${aws_api_gateway_rest_api.api.id}"
   parent_id   = "${aws_api_gateway_rest_api.api.root_resource_id}"
-  path_part   = "query"
 }
 
-resource "aws_api_gateway_method" "query" {
+resource "aws_api_gateway_resource" "command" {
+  path_part   = "command"
+  rest_api_id = "${aws_api_gateway_rest_api.api.id}"
+  parent_id   = "${aws_api_gateway_rest_api.api.root_resource_id}"
+}
+
+resource "aws_api_gateway_method" "query_options_method" {
+  rest_api_id   = "${aws_api_gateway_rest_api.api.id}"
+  resource_id   = "${aws_api_gateway_resource.query.id}"
+  http_method   = "OPTIONS"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_method" "command_options_method" {
+  rest_api_id   = "${aws_api_gateway_rest_api.api.id}"
+  resource_id   = "${aws_api_gateway_resource.command.id}"
+  http_method   = "OPTIONS"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_method_response" "query_options_method_response" {
+  rest_api_id   = "${aws_api_gateway_rest_api.api.id}"
+  resource_id   = "${aws_api_gateway_resource.query.id}"
+  http_method   = "${aws_api_gateway_method.query_options_method.http_method}"
+  status_code   = "200"
+  response_models = {
+    "application/json" = "Empty"
+  }
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = false,
+    "method.response.header.Access-Control-Allow-Methods" = false,
+    "method.response.header.Access-Control-Allow-Origin" = false
+  }
+  depends_on = ["aws_api_gateway_method.query_options_method"]
+}
+
+resource "aws_api_gateway_method_response" "command_options_method_response" {
+  rest_api_id   = "${aws_api_gateway_rest_api.api.id}"
+  resource_id   = "${aws_api_gateway_resource.command.id}"
+  http_method   = "${aws_api_gateway_method.command_options_method.http_method}"
+  status_code   = "200"
+  response_models = {
+    "application/json" = "Empty"
+  }
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = false,
+    "method.response.header.Access-Control-Allow-Methods" = false,
+    "method.response.header.Access-Control-Allow-Origin" = false
+  }
+  depends_on = ["aws_api_gateway_method.query_options_method"]
+}
+
+resource "aws_api_gateway_integration" "query_options_integration" {
+  rest_api_id   = "${aws_api_gateway_rest_api.api.id}"
+  resource_id   = "${aws_api_gateway_resource.query.id}"
+  http_method   = "${aws_api_gateway_method.query_options_method.http_method}"
+  type          = "MOCK"
+  depends_on    = ["aws_api_gateway_method.query_options_method"]
+  request_templates = {
+    "application/json" = jsonencode({statusCode = 200})
+  }
+}
+
+resource "aws_api_gateway_integration" "command_options_integration" {
+  rest_api_id   = "${aws_api_gateway_rest_api.api.id}"
+  resource_id   = "${aws_api_gateway_resource.command.id}"
+  http_method   = "${aws_api_gateway_method.command_options_method.http_method}"
+  type          = "MOCK"
+  depends_on    = ["aws_api_gateway_method.command_options_method"]
+  request_templates = {
+    "application/json" = jsonencode({statusCode = 200})
+  }
+}
+
+resource "aws_api_gateway_integration_response" "query_options_integration_response" {
+  rest_api_id   = "${aws_api_gateway_rest_api.api.id}"
+  resource_id   = "${aws_api_gateway_resource.query.id}"
+  http_method   = "${aws_api_gateway_method.query_options_method.http_method}"
+  status_code   = "${aws_api_gateway_method_response.query_options_method_response.status_code}"
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,POST'",
+    "method.response.header.Access-Control-Allow-Origin" = "'*'"
+  }
+  response_templates  = {
+    "application/json" = ""
+  }
+  depends_on = ["aws_api_gateway_method_response.query_options_method_response"]
+}
+
+resource "aws_api_gateway_integration_response" "command_options_integration_response" {
+  rest_api_id   = "${aws_api_gateway_rest_api.api.id}"
+  resource_id   = "${aws_api_gateway_resource.command.id}"
+  http_method   = "${aws_api_gateway_method.command_options_method.http_method}"
+  status_code   = "${aws_api_gateway_method_response.command_options_method_response.status_code}"
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,POST'",
+    "method.response.header.Access-Control-Allow-Origin" = "'*'"
+  }
+  response_templates  = {
+    "application/json" = ""
+  }
+  depends_on = ["aws_api_gateway_method_response.command_options_method_response"]
+}
+
+resource "aws_api_gateway_method" "query_post_method" {
   rest_api_id   = "${aws_api_gateway_rest_api.api.id}"
   resource_id   = "${aws_api_gateway_resource.query.id}"
   http_method   = "POST"
   authorization = "NONE"
 }
 
-resource "aws_api_gateway_resource" "command" {
-  rest_api_id = "${aws_api_gateway_rest_api.api.id}"
-  parent_id   = "${aws_api_gateway_rest_api.api.root_resource_id}"
-  path_part   = "command"
-}
-
-resource "aws_api_gateway_method" "command" {
+resource "aws_api_gateway_method" "command_post_method" {
   rest_api_id   = "${aws_api_gateway_rest_api.api.id}"
   resource_id   = "${aws_api_gateway_resource.command.id}"
   http_method   = "POST"
   authorization = "NONE"
 }
 
-resource "aws_api_gateway_integration" "lambda_query_integration" {
-  rest_api_id = "${aws_api_gateway_rest_api.api.id}"
-  resource_id = "${aws_api_gateway_method.query.resource_id}"
-  http_method = "${aws_api_gateway_method.query.http_method}"
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-  uri                     = "${aws_lambda_function.lambda.invoke_arn}"
+resource "aws_api_gateway_method_response" "query_post_method_response" {
+  rest_api_id   = "${aws_api_gateway_rest_api.api.id}"
+  resource_id   = "${aws_api_gateway_resource.query.id}"
+  http_method   = "${aws_api_gateway_method.query_post_method.http_method}"
+  status_code   = "200"
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = false
+  }
+  depends_on = ["aws_api_gateway_method.query_post_method"]
 }
 
-resource "aws_api_gateway_integration" "lambda_command_integration" {
+resource "aws_api_gateway_method_response" "command_post_method_response" {
+  rest_api_id   = "${aws_api_gateway_rest_api.api.id}"
+  resource_id   = "${aws_api_gateway_resource.command.id}"
+  http_method   = "${aws_api_gateway_method.command_post_method.http_method}"
+  status_code   = "200"
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = false
+  }
+  depends_on = ["aws_api_gateway_method.command_post_method"]
+}
+
+resource "aws_api_gateway_integration" "query_post_integration" {
   rest_api_id = "${aws_api_gateway_rest_api.api.id}"
-  resource_id = "${aws_api_gateway_method.command.resource_id}"
-  http_method = "${aws_api_gateway_method.command.http_method}"
-  integration_http_method = "POST"
+  resource_id = "${aws_api_gateway_resource.query.id}"
+  http_method = "${aws_api_gateway_method.query_post_method.http_method}"
   type                    = "AWS_PROXY"
+  integration_http_method = "POST"
   uri                     = "${aws_lambda_function.lambda.invoke_arn}"
+  depends_on              = ["aws_api_gateway_method.query_post_method", "aws_lambda_function.lambda"]
+}
+
+resource "aws_api_gateway_integration" "command_post_integration" {
+  rest_api_id = "${aws_api_gateway_rest_api.api.id}"
+  resource_id = "${aws_api_gateway_resource.command.id}"
+  http_method = "${aws_api_gateway_method.command_post_method.http_method}"
+  type                    = "AWS_PROXY"
+  integration_http_method = "POST"
+  uri                     = "${aws_lambda_function.lambda.invoke_arn}"
+  depends_on              = ["aws_api_gateway_method.command_post_method", "aws_lambda_function.lambda"]
 }
 
 resource "aws_api_gateway_deployment" "api_deployment" {
-  depends_on = [
-    "aws_api_gateway_integration.lambda_query_integration",
-    "aws_api_gateway_integration.lambda_command_integration",
-  ]
   rest_api_id = "${aws_api_gateway_rest_api.api.id}"
   stage_name = "default"
+  depends_on = ["aws_api_gateway_integration.query_post_integration", "aws_api_gateway_integration.command_post_integration"]
 }
 
 resource "aws_api_gateway_base_path_mapping" "mapping" {
