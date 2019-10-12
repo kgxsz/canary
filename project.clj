@@ -3,9 +3,8 @@
                  [com.amazonaws/aws-lambda-java-core "1.0.0"]
                  [com.taoensso/faraday "1.9.0"]
                  [metosin/muuntaja "0.6.4"]
-                 [clj-time "0.15.0"]
-                 [danlentz/clj-uuid "0.1.7"]
-                 [medley "1.2.0"]]
+                 [medley "1.2.0"]
+                 [ring/ring-core "1.7.1"]]
   :main canary.handler
   :target-path "target/"
   :uberjar-name "canary.jar"
