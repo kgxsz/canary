@@ -1,9 +1,7 @@
 (ns canary.handler
-  (:require [taoensso.faraday :as faraday]
+  (:require [canary.query :as query]
+            [canary.command :as command]
             [medley.core :as medley]
-            [clj-uuid :as uuid]
-            [clj-time.core :as time]
-            [clj-time.coerce :as time.coerce]
             [muuntaja.core :as muuntaja])
   (:import [com.amazonaws.services.lambda.runtime.RequestStreamHandler]
            [java.io ByteArrayInputStream ByteArrayOutputStream])
@@ -11,57 +9,9 @@
    :name canary.Handler
    :implements [com.amazonaws.services.lambda.runtime.RequestStreamHandler]))
 
-(def ^:const +namespace+ #uuid "cc96ca9d-2ce4-49a4-a5c6-801291865907")
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Config ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(def config {:dynamodb {:access-key (System/getenv "ACCESS_KEY")
-                        :secret-key (System/getenv "SECRET_KEY")
-                        :endpoint "http://dynamodb.eu-west-1.amazonaws.com"
-                        :batch-write-limit 25}})
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Query ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-(defmulti handle-query first)
-
-(defmethod handle-query :profile [[_ {:keys [user]}]]
-  {:profile (faraday/get-item
-             (:dynamodb config)
-             :canary
-             {:partition (str user ":profile")
-              :sort 123456})})
-
-(defmethod handle-query :default [query]
-  (throw (IllegalArgumentException. "Unsupported query method.")))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Command ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defmulti handle-command first)
-
-(defmethod handle-command :add-profile [[_ {:keys [user profile]}]]
- (let [item {:partition (str user ":profile")
-              :sort 123456
-              :profile profile}]
-    (faraday/put-item (:dynamodb config) :canary item)
-    {}))
-
-(defmethod handle-command :default [command]
-  (throw (IllegalArgumentException. "Unsupported command method.")))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Handler ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defn encode-output-stream [output-stream status-code response-body]
+(defn encode-output-stream
+  [output-stream status-code response-body]
   (let [encoder (muuntaja/create (assoc muuntaja/default-options :return :bytes))
         response {:statusCode status-code
                   :headers {"Access-Control-Allow-Origin" "*"
@@ -70,7 +20,8 @@
     (.write output-stream (muuntaja/encode encoder "application/json" response))))
 
 
-(defn decode-input-stream [input-stream]
+(defn decode-input-stream
+  [input-stream]
   (try
     (-> (muuntaja/decode "application/json" input-stream)
         (update :body (partial muuntaja/decode "application/json")))
@@ -83,8 +34,8 @@
   (try
     (let [{:keys [body path]} (decode-input-stream input-stream)
           handle (case path
-                   "/query" handle-query
-                   "/command" handle-command
+                   "/query" query/handle
+                   "/command" command/handle
                    (throw (IllegalArgumentException. "Unsupported path parameter.")))
           response-body (or (apply medley/deep-merge (map handle body)) {})]
       (encode-output-stream output-stream 200 response-body))
