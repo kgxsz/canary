@@ -173,7 +173,7 @@ resource "aws_api_gateway_deployment" "api_deployment" {
 resource "aws_api_gateway_base_path_mapping" "mapping" {
   api_id      = "${aws_api_gateway_rest_api.api.id}"
   stage_name  = "${aws_api_gateway_deployment.api_deployment.stage_name}"
-  domain_name =  "api.${var.project}.keigo.io"
+  domain_name =  "api.kaizen.keigo.io"
 }
 
 # DynamoDB
