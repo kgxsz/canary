@@ -1,6 +1,7 @@
 (ns canary.command
   (:require [canary.db :as db]
             [taoensso.faraday :as faraday]
+            [muuntaja.core :as muuntaja]
             [clj-http.client :as client]))
 
 
@@ -16,16 +17,17 @@
 
 
 (defmethod handle :verify-authorisation [[_ {:keys [code]}]]
-  #_(client/post "https://github.com/login/oauth/access_token"
-               {:body (slurp (muuntaja/encode "application/json"
-                                              {:client-id "1234"
-                                               :client-secret "1234"
-                                               :code code}))
-                :content-type :json
-                :accept :json})
-  ;; make connection
-  ;; create session
-  {:code code})
+  (let [request-body {"client_id" (System/getenv "AUTHORISATION_CLIENT_ID")
+                      "client_secret" (System/getenv "AUTHORISATION_CLIENT_SECRET")
+                      "code" code}
+        _ (println (slurp (muuntaja/encode "application/json" request-body)))
+        response (client/post "https://github.com/login/oauth/access_token"
+                              {:body (slurp (muuntaja/encode "application/json" request-body))
+                               :content-type :json
+                               :accept :json})]
+    ;; make connection
+    ;; create session
+    {:github response}))
 
 
 (defmethod handle :default [command]
