@@ -14,7 +14,7 @@
   [input-stream]
   (try
     (let [{:keys [body path]} (muuntaja/decode "application/json" input-stream)]
-      {:request-body (muuntaja/decode body "application/transit+json")
+      {:request-body (muuntaja/decode "application/transit+json" body)
        :handle (case path "/query" query/handle "/command" command/handle)})
     (catch Exception e
       (throw (IllegalArgumentException. (.getMessage e))))))
