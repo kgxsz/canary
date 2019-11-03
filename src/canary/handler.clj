@@ -10,6 +10,15 @@
    :implements [com.amazonaws.services.lambda.runtime.RequestStreamHandler]))
 
 
+(defn decode-input-stream
+  [input-stream]
+  (try
+    (-> (muuntaja/decode "application/json" input-stream)
+        (update :body (partial muuntaja/decode "application/json")))
+    (catch Exception e
+      (throw (IllegalArgumentException. "The input stream is malformed.")))))
+
+
 (defn encode-output-stream
   [output-stream status-code response-body]
   (let [encoder (muuntaja/create (assoc muuntaja/default-options :return :bytes))
@@ -18,15 +27,6 @@
                             "Content-Type" "application/json"}
                   :body (slurp (muuntaja/encode "application/json" response-body))}]
     (.write output-stream (muuntaja/encode encoder "application/json" response))))
-
-
-(defn decode-input-stream
-  [input-stream]
-  (try
-    (-> (muuntaja/decode "application/json" input-stream)
-        (update :body (partial muuntaja/decode "application/json")))
-    (catch Exception e
-      (throw (IllegalArgumentException. "The input stream is malformed.")))))
 
 
 (defn -handleRequest
