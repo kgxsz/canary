@@ -1,10 +1,12 @@
 # Variables
 variable "project" { default = "canary" }
-variable "AWS_REGION" { default = "eu-west-1" }
+variable "aws_region" { default = "eu-west-1" }
+variable "authorisation_client_id" { default = "8d06f025e5fbd7809f2b" }
+variable "authorisation_client_secret" {}
 
 # Provider
 provider "aws" {
-  region = "${var.AWS_REGION}"
+  region = "${var.aws_region}"
 }
 
 # S3
@@ -38,7 +40,7 @@ resource "aws_iam_policy" "lambda_policy" {
         "logs:PutLogEvents"
       ],
       "Effect": "Allow",
-      "Resource": "arn:aws:logs:${var.AWS_REGION}:*:log-group:/aws/lambda/${var.project}:*"
+      "Resource": "arn:aws:logs:${var.aws_region}:*:log-group:/aws/lambda/${var.project}:*"
     },
     {
       "Action": [
@@ -52,7 +54,7 @@ resource "aws_iam_policy" "lambda_policy" {
         "dynamodb:DeleteItem"
       ],
       "Effect": "Allow",
-      "Resource": "arn:aws:dynamodb:${var.AWS_REGION}:*:table/${var.project}"
+      "Resource": "arn:aws:dynamodb:${var.aws_region}:*:table/${var.project}"
     }
   ]
 }
@@ -102,6 +104,12 @@ resource "aws_lambda_function" "lambda" {
   runtime            = "java8"
   timeout            = 100
   memory_size        = 512
+  environment {
+    variables = {
+      AUTHORISATION_CLIENT_ID = var.authorisation_client_id
+      AUTHORISATION_CLIENT_SECRET = var.authorisation_client_secret
+    }
+  }
 }
 
 
@@ -207,7 +215,7 @@ resource "aws_api_gateway_integration_response" "query_options_integration_respo
     "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,POST'",
     "method.response.header.Access-Control-Allow-Origin" = "'*'"
   }
-  response_templates  = {
+  response_templates = {
     "application/json" = ""
   }
   depends_on = ["aws_api_gateway_method_response.query_options_method_response"]
@@ -223,7 +231,7 @@ resource "aws_api_gateway_integration_response" "command_options_integration_res
     "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,POST'",
     "method.response.header.Access-Control-Allow-Origin" = "'*'"
   }
-  response_templates  = {
+  response_templates = {
     "application/json" = ""
   }
   depends_on = ["aws_api_gateway_method_response.command_options_method_response"]
