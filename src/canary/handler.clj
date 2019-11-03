@@ -17,7 +17,7 @@
       {:request-body (muuntaja/decode body "application/transit+json")
        :handle (case path "/query" query/handle "/command" command/handle)})
     (catch Exception e
-      (throw IllegalArgumentException. (.getMessage e)))))
+      (throw (IllegalArgumentException. (.getMessage e))))))
 
 
 (defn encode-output-stream
