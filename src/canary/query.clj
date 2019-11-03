@@ -14,5 +14,9 @@
               :sort 123456})})
 
 
+(defmethod handle :authorisation-details [[_ _]]
+  {:client-id "8d06f025e5fbd7809f2b"})
+
+
 (defmethod handle :default [query]
   (throw (IllegalArgumentException. "Unsupported query method.")))
