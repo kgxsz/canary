@@ -15,7 +15,7 @@
    {}))
 
 
-(defmethod handle :authorise [[_ {:keys [code]}]]
+(defmethod handle :verify-authorisation [[_ {:keys [code]}]]
   #_(client/post "https://github.com/login/oauth/access_token"
                {:body (slurp (muuntaja/encode "application/json"
                                               {:client-id "1234"
@@ -25,7 +25,7 @@
                 :accept :json})
   ;; make connection
   ;; create session
-  {:hi :there})
+  {:code code})
 
 
 (defmethod handle :default [command]
