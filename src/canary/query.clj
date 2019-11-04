@@ -15,7 +15,7 @@
 
 
 (defmethod handle :authorisation-details [[_ _]]
-  {:client-id (System/getenv "AUTHORISATION_CLIENT_ID") #_"8d06f025e5fbd7809f2b"})
+  {:client-id (System/getenv "AUTHORISATION_CLIENT_ID")})
 
 
 (defmethod handle :default [query]
