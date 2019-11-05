@@ -24,14 +24,17 @@
                               {:body (slurp (muuntaja/encode "application/json" request-body))
                                :content-type :json
                                :accept :json})
-        user (client/get "https://api.github.com/user"
-                         {:headers {"Authorization" ["token" (get-in response [:body "access_token"])]}})]
+        access-token (:access_token (muuntaja/decode "application/json" (:body response)))
+        response (client/get "https://api.github.com/user"
+                             {:headers {:authorization (format "token %s" access-token)}})
+        user (muuntaja/decode "application/json" (:body response))]
     ;; get user id
     ;; create session
     (println "************************************")
     (println user)
+    (println (keys user))
     (println "************************************")
-    {:hi :there}))
+    {:hi user}))
 
 
 (defmethod handle :default [command]
