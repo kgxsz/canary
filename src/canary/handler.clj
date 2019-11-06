@@ -25,7 +25,8 @@
   (let [encoder (muuntaja/create (assoc muuntaja/default-options :return :bytes))
         response {:statusCode status-code
                   :headers {"Access-Control-Allow-Origin" "*"
-                            "Content-Type" "application/transit+json"}
+                            "Content-Type" "application/transit+json"
+                            "Set-Cookie" "session-id=123456789; HttpOnly"}
                   :body (slurp (muuntaja/encode "application/transit+json" response-body))}]
     (.write output-stream (muuntaja/encode encoder "application/json" response))))
 
