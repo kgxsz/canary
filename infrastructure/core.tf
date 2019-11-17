@@ -215,8 +215,7 @@ resource "aws_api_gateway_integration_response" "query_options_integration_respo
   http_method   = "${aws_api_gateway_method.query_options_method.http_method}"
   status_code   = "${aws_api_gateway_method_response.query_options_method_response.status_code}"
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Set-Cookie,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-    "method.response.header.Access-Control-Expose-Headers" = "'*, Authorization'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
     "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,POST'"
     "method.response.header.Access-Control-Allow-Credentials" = "'true'"
     "method.response.header.Access-Control-Allow-Origin" = "'https://kaizen.keigo.io'"
@@ -233,8 +232,7 @@ resource "aws_api_gateway_integration_response" "command_options_integration_res
   http_method   = "${aws_api_gateway_method.command_options_method.http_method}"
   status_code   = "${aws_api_gateway_method_response.command_options_method_response.status_code}"
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Set-Cookie,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-    "method.response.header.Access-Control-Expose-Headers" = "'*, Authorization'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
     "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,POST'"
     "method.response.header.Access-Control-Allow-Credentials" = "'true'"
     "method.response.header.Access-Control-Allow-Origin" = "'https://kaizen.keigo.io'"
@@ -268,7 +266,6 @@ resource "aws_api_gateway_method_response" "query_post_method_response" {
     "method.response.header.Access-Control-Allow-Origin" = false
     "method.response.header.Access-Control-Allow-Credentials" = false
     "method.response.header.Access-Control-Allow-Headers" = false
-    "method.response.header.Access-Control-Expose-Headers" = false
     "method.response.header.Access-Control-Allow-Methods" = false
   }
   depends_on = ["aws_api_gateway_method.query_post_method"]
@@ -283,7 +280,6 @@ resource "aws_api_gateway_method_response" "command_post_method_response" {
     "method.response.header.Access-Control-Allow-Origin" = false
     "method.response.header.Access-Control-Allow-Credentials" = false
     "method.response.header.Access-Control-Allow-Headers" = false
-    "method.response.header.Access-Control-Expose-Headers" = false
     "method.response.header.Access-Control-Allow-Methods" = false
 
   }
