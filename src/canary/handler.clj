@@ -24,9 +24,10 @@
   [output-stream status-code response-body]
   (let [encoder (muuntaja/create (assoc muuntaja/default-options :return :bytes))
         response {:statusCode status-code
-                  :headers {"Access-Control-Allow-Origin" "*"
+                  :headers {"Access-Control-Allow-Origin" "https://kaizen.keigo.io"
+                            "Access-Control-Allow-Credentials" "true"
                             "Content-Type" "application/transit+json"
-                            "Set-Cookie" "session-id=123456789; HttpOnly"}
+                            "Set-Cookie" "thing=12345; Path=/; Domain=.kaizen.keigo.io; Max-Age=86400"}
                   :body (slurp (muuntaja/encode "application/transit+json" response-body))}]
     (.write output-stream (muuntaja/encode encoder "application/json" response))))
 
