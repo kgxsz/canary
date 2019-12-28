@@ -5,7 +5,8 @@
                  [metosin/muuntaja "0.6.6"]
                  [medley "1.2.0"]
                  [clj-http "3.10.0"]
-                 [ring/ring-core "1.7.1"]]
+                 [ring/ring-core "1.8.0"]
+                 [ring-cors "0.1.13"]]
   :main canary.handler
   :target-path "target/"
   :uberjar-name "canary.jar"
