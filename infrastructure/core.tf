@@ -1,8 +1,9 @@
 # Variables
 variable "project" { default = "canary" }
 variable "aws_region" { default = "eu-west-1" }
-variable "authorisation_client_id" { default = "8d06f025e5fbd7809f2b" }
+variable "authorisation_client_id" { default = "db25cb77a169c3b6565f" }
 variable "authorisation_client_secret" {}
+variable "cookie_store_key" {}
 
 # Provider
 provider "aws" {
@@ -108,6 +109,7 @@ resource "aws_lambda_function" "lambda" {
     variables = {
       AUTHORISATION_CLIENT_ID = var.authorisation_client_id
       AUTHORISATION_CLIENT_SECRET = var.authorisation_client_secret
+      COOKIE_STORE_KEY = var.cookie_store_key
     }
   }
 }
