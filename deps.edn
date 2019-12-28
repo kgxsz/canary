@@ -1,0 +1,15 @@
+{:deps {ring/ring-core {:mvn/version "1.8.0"}
+        ring/ring-jetty-adapter {:mvn/version "1.8.0"}
+        ring-cors {:mvn/version "0.1.13"}
+        metosin/muuntaja {:mvn/version "0.6.6"}
+        clj-http {:mvn/version "3.10.0"}
+        com.taoensso/faraday {:mvn/version "1.9.0"}
+        medley {:mvn/version "1.2.0"}
+        ;; TODO - remove when I've got a decent key
+        crypto-random {:mvn/version "1.2.0"}}
+ :aliases {:nrepl {:extra-deps {cider/cider-nrepl {:mvn/version "0.22.0-beta8"}
+                                refactor-nrepl {:mvn/version "2.5.0-SNAPSHOT"}}
+                   :main-opts ["-m"
+                               "nrepl.cmdline"
+                               "--middleware"
+                               "[cider.nrepl/cider-middleware,refactor-nrepl.middleware/wrap-refactor]"]}}}
