@@ -6,4 +6,3 @@
              :secret-key (System/getenv "SECRET_KEY")
              :endpoint "http://dynamodb.eu-west-1.amazonaws.com"
              :batch-write-limit 25})
-

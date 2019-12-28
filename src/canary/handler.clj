@@ -1,6 +1,7 @@
 (ns canary.handler
   (:require [canary.query :as query]
             [canary.command :as command]
+            [canary.middleware :as middleware]
             [medley.core :as medley]
             [muuntaja.core :as muuntaja])
   (:import [com.amazonaws.services.lambda.runtime.RequestStreamHandler]
@@ -10,37 +11,40 @@
    :implements [com.amazonaws.services.lambda.runtime.RequestStreamHandler]))
 
 
-(defn decode-input-stream
+(defn read-input-stream
   [input-stream]
-  (try
-    (let [{:keys [body path]} (muuntaja/decode "application/json" input-stream)]
-      {:request-body (muuntaja/decode "application/transit+json" body)
-       :handle (case path "/query" query/handle "/command" command/handle)})
-    (catch Exception e
-      (throw (IllegalArgumentException. (.getMessage e))))))
+  (muuntaja/decode "application/json" input-stream))
 
 
-(defn encode-output-stream
-  [output-stream status-code response-body]
-  (let [encoder (muuntaja/create (assoc muuntaja/default-options :return :bytes))
-        response {:statusCode status-code
-                  :headers {"Access-Control-Allow-Origin" "https://kaizen.keigo.io"
-                            "Access-Control-Allow-Credentials" "true"
-                            "Content-Type" "application/transit+json"
-                            "Set-Cookie" "thing=12345; Path=/; Domain=.kaizen.keigo.io; Max-Age=86400"}
-                  :body (slurp (muuntaja/encode "application/transit+json" response-body))}]
+(defn write-output-stream
+  [output-stream response]
+  (let [encoder (muuntaja/create (assoc muuntaja/default-options :return :bytes))]
     (.write output-stream (muuntaja/encode encoder "application/json" response))))
+
+
+(defn handler [{:keys [handle body-params] :as request}]
+  {:status 200
+   :headers {}
+   :body (apply medley/deep-merge (map handle body-params))})
+
+
+(def app
+  (-> handler
+      (middleware/wrap-handle)
+      (middleware/wrap-current-user-id)
+      (middleware/wrap-content-type)
+      (middleware/wrap-session)
+      (middleware/wrap-cors)
+      (middleware/wrap-adaptor)))
 
 
 (defn -handleRequest
   [_ input-stream output-stream context]
   (try
-    (let [{:keys [request-body handle]} (decode-input-stream input-stream)
-          response-body (apply medley/deep-merge (map handle request-body))]
-      (encode-output-stream output-stream 200 response-body))
-    (catch IllegalArgumentException e
-      (.printStackTrace e)
-      (encode-output-stream output-stream 400 {:error (.getMessage e)}))
+    (->> input-stream
+         (read-input-stream)
+         (app)
+         (write-output-stream output-stream))
     (catch Exception e
       (.printStackTrace e)
-      (encode-output-stream output-stream 500 {:error (.getMessage e)}))))
+      (write-output-stream output-stream {:statusCode 500}))))
