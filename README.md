@@ -8,7 +8,11 @@
   - `AUTHORISATION_CLIENT_SECRET`
   - `COOKIE_STORE_KEY`
 - Kick off a repl from the command line: `clj -A:nrepl`.
-- Then connect from within emacs: `C-c M-c` 
+- Connect from within emacs: `C-c M-c`.
+- Start the local server by evaluating `dev/canary/server.clj`.
+- The following endpoints are now available:
+  - `api.localhost/query`
+  - `api.localhost/command`
 
 ## Deploy infrastructure
 - First time around: `terraform init infrastructure`.
