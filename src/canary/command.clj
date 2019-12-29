@@ -24,7 +24,8 @@
                         "https://github.com/login/oauth/access_token"
                         {:body (slurp (muuntaja/encode "application/json" request-body))
                          :content-type :json
-                         :accept :json})
+                         :accept :json
+                         :cookie-policy :standard})
         access-token (:access_token (muuntaja/decode "application/json" body))
         {:keys [body]} (client/get
                         "https://api.github.com/user"
