@@ -6,9 +6,7 @@
             [ring.middleware.session.cookie :as cookie]
             [muuntaja.middleware :as muuntaja.middleware]
             [medley.core :as medley]
-            [clojure.java.io :as io]
-            ;; TODO - Kill this when no longer required
-            #_[crypto.random :as crypto]))
+            [clojure.java.io :as io]))
 
 
 (defn wrap-handle
@@ -80,32 +78,6 @@
    :access-control-allow-origin [#".*"]
    :access-control-allow-methods [:options :post]
    :access-control-allow-credentials "true"))
-
-
-(defn adapt-request
-  [{:keys [headers path requestContext body] :as request}]
-  (let [{:keys [X-Forwarded-Port X-Forwarded-For X-Forwarded-Proto Host]} headers]
-    {:server-port (Integer/parseInt X-Forwarded-Port)
-     :server-name Host
-     :remote-addr (first (clojure.string/split X-Forwarded-For #", "))
-     :uri path
-     :scheme (keyword X-Forwarded-Proto)
-     :protocol (:protocol requestContext)
-     :headers (medley/map-keys
-               (comp clojure.string/lower-case name)
-               headers)
-     :request-method (-> (:httpMethod request)
-                         (clojure.string/lower-case)
-                         (keyword))
-     :body (some-> body (.getBytes) io/input-stream)
-     :query-string (:queryStringParameters request)}))
-
-
-(defn adapt-response
-  [{:keys [status headers body]}]
-  {:statusCode status
-   :headers (update headers "Set-Cookie" first)
-   :body (slurp body)})
 
 
 (defn wrap-adaptor

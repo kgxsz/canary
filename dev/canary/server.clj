@@ -1,18 +1,11 @@
 (ns canary.server
-  (:require [canary.middleware :as middleware]
-            [medley.core :as medley]
+  (:require [canary.handler :as handler]
+            [canary.middleware :as middleware]
             [ring.adapter.jetty :as jetty]))
 
 
-(defn handler [{:keys [handle body-params] :as request}]
-  (let [response-body (apply medley/deep-merge (map handle body-params))]
-    {:status 404
-     :headers {}
-     :body response-body}))
-
-
 (def app
-  (-> handler
+  (-> handler/handler
       (middleware/wrap-handle)
       (middleware/wrap-current-user-id)
       (middleware/wrap-content-type)
