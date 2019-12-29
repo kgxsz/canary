@@ -1,11 +1,14 @@
 (ns canary.server
-  (:require [canary.handler :as handler]
-            [canary.middleware :as middleware]
+  (:require [canary.middleware :as middleware]
+            [medley.core :as medley]
             [ring.adapter.jetty :as jetty]))
 
 
-(def app
-  (-> handler/handler
+(def handler
+  (-> (fn [{:keys [handle body-params]}]
+        {:status 200
+         :headers {}
+         :body (apply medley/deep-merge (map handle body-params))})
       (middleware/wrap-handle)
       (middleware/wrap-current-user-id)
       (middleware/wrap-content-type)
@@ -15,7 +18,7 @@
 
 (defn start-server []
   (let [options {:port 80 :join? false}]
-    (jetty/run-jetty #'app options)))
+    (jetty/run-jetty #'handler options)))
 
 
 (defonce server (start-server))

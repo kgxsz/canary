@@ -22,14 +22,11 @@
     (.write output-stream (muuntaja/encode encoder "application/json" response))))
 
 
-(defn handler [{:keys [handle body-params] :as request}]
-  {:status 200
-   :headers {}
-   :body (apply medley/deep-merge (map handle body-params))})
-
-
-(def app
-  (-> handler
+(def handler
+  (-> (fn [{:keys [handle body-params]}]
+        {:status 200
+         :headers {}
+         :body (apply medley/deep-merge (map handle body-params))})
       (middleware/wrap-handle)
       (middleware/wrap-current-user-id)
       (middleware/wrap-content-type)
@@ -43,7 +40,7 @@
   (try
     (->> input-stream
          (read-input-stream)
-         (app)
+         (handler)
          (write-output-stream output-stream))
     (catch Exception e
       (.printStackTrace e)
