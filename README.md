@@ -4,12 +4,11 @@
 
 ## Local development setup
 - Set up the required environment variables:
-  - `AUTHORISATION_CLIENT_ID`
-  - `AUTHORISATION_CLIENT_SECRET`
-  - `COOKIE_STORE_KEY`
-  - `COOKIE_ATTRIBUTE_DOMAIN`
-  - `COOKIE_ATTRIBUTE_SECURE`
-  - `CORS_ORIGIN`
+  - `AUTHORISATION_CLIENT_ID` as that provided by Github.
+  - `AUTHORISATION_CLIENT_SECRET` as that provided by Github.
+  - `COOKIE_STORE_KEY` as a 16 byte secret key.
+  - `COOKIE_ATTRIBUTE_SECURE` as `false`.
+  - `CORS_ORIGIN` as `http://localhost:8080`.
 - Kick off a repl from the command line: `clj -A:nrepl`.
 - Connect from within emacs: `C-c M-c`.
 - Start the local server by evaluating `dev/canary/server.clj`.
