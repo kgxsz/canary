@@ -1,14 +1,16 @@
 (ns canary.server
   (:require [canary.middleware :as middleware]
             [medley.core :as medley]
+            [ring.util.response :as response]
             [ring.adapter.jetty :as jetty]))
 
 
 (def handler
-  (-> (fn [{:keys [handle body-params]}]
-        {:status 200
-         :headers {}
-         :body (apply medley/deep-merge (map handle body-params))})
+  (-> (fn [request]
+        (->> (:body-params request)
+             (map (:handle request))
+             (apply medley/deep-merge)
+             (response/response)))
       (middleware/wrap-handle)
       (middleware/wrap-current-user-id)
       (middleware/wrap-content-type)

@@ -2,6 +2,7 @@
   (:require [canary.query :as query]
             [canary.command :as command]
             [canary.middleware :as middleware]
+            [ring.util.response :as response]
             [medley.core :as medley]
             [muuntaja.core :as muuntaja])
   (:import [com.amazonaws.services.lambda.runtime.RequestStreamHandler]
@@ -23,10 +24,11 @@
 
 
 (def handler
-  (-> (fn [{:keys [handle body-params]}]
-        {:status 200
-         :headers {}
-         :body (apply medley/deep-merge (map handle body-params))})
+  (-> (fn [request]
+        (->> (:body-params request)
+             (map (:handle request))
+             (apply medley/deep-merge)
+             (response/response)))
       (middleware/wrap-handle)
       (middleware/wrap-current-user-id)
       (middleware/wrap-content-type)
