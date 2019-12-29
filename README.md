@@ -7,6 +7,8 @@
   - `AUTHORISATION_CLIENT_ID`
   - `AUTHORISATION_CLIENT_SECRET`
   - `COOKIE_STORE_KEY`
+  - `COOKIE_ATTRIBUTE_DOMAIN`
+  - `COOKIE_ATTRIBUTE_SECURE`
 - Kick off a repl from the command line: `clj -A:nrepl`.
 - Connect from within emacs: `C-c M-c`.
 - Start the local server by evaluating `dev/canary/server.clj`.
