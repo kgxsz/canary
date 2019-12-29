@@ -6,6 +6,7 @@ variable "authorisation_client_secret" {}
 variable "cookie_store_key" {}
 variable "cookie_attribute_domain" { default = ".kaizen.keigo.io" }
 variable "cookie_attribute_secure" { default = "true" }
+variable "cors_origin" { default = "https://kaizen.keigo.io" }
 
 # Provider
 provider "aws" {
@@ -114,6 +115,7 @@ resource "aws_lambda_function" "lambda" {
       COOKIE_STORE_KEY = var.cookie_store_key
       COOKIE_ATTRIBUTE_DOMAIN = var.cookie_attribute_domain
       COOKIE_ATTRIBUTE_SECURE = var.cookie_attribute_secure
+      CORS_ORIGIN = var.cors_origin
     }
   }
 }

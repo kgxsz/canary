@@ -68,7 +68,7 @@
   [handler]
   (cors.middleware/wrap-cors
    handler
-   :access-control-allow-origin [#".*"]
+   :access-control-allow-origin [(re-pattern (System/getenv "CORS_ORIGIN"))]
    :access-control-allow-methods [:options :post]
    :access-control-allow-credentials "true"))
 
