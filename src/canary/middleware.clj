@@ -54,19 +54,12 @@
   (session.middleware/wrap-session
    handler
    {:cookie-name "session"
-    ;; TODO - update attributes as environment variables: https://github.com/ring-clojure/ring/blob/master/ring-core/src/ring/middleware/cookies.clj#L176
     :cookie-attrs {:max-age 120
-                   ;; TODO - make this an environment variable
-                   :domain ".kaizen.keigo.io"
-                   ;; TODO - make this an environment variable
+                   :domain (System/getenv "COOKIE_ATTRIBUTE_DOMAIN")
                    :path "/"
-                   ;; TODO - make this an environment variable
                    :http-only true
-                   ;; TODO - make this an environment variable
                    :same-site :none
-                   ;; TODO - make this an environment variable
-                   :secure true
-                   }
+                   :secure (Boolean/parseBoolean (System/getenv "COOKIE_ATTRIBUTE_SECURE"))}
     :store (cookie/cookie-store {:key (System/getenv "COOKIE_STORE_KEY")})}))
 
 
