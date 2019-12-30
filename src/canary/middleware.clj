@@ -73,6 +73,18 @@
    :access-control-allow-credentials "true"))
 
 
+(defn wrap-exception
+  "Handles all uncaught exceptions, prints the stacktrace to the logs,
+   and then returns the appropriate error code."
+  [handler]
+  (fn [request]
+    (try
+      (handler request)
+      (catch Exception e
+        (.printStackTrace e)
+        {:status 500}))))
+
+
 (defn wrap-adaptor
   "Handlers the adaption between Ring and AWS Lambda."
   [handler]

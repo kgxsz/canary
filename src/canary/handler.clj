@@ -34,6 +34,7 @@
       (middleware/wrap-content-type)
       (middleware/wrap-session)
       (middleware/wrap-cors)
+      (middleware/wrap-exception)
       (middleware/wrap-adaptor)))
 
 

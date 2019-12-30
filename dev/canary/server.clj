@@ -15,7 +15,8 @@
       (middleware/wrap-current-user-id)
       (middleware/wrap-content-type)
       (middleware/wrap-session)
-      (middleware/wrap-cors)))
+      (middleware/wrap-cors)
+      (middleware/wrap-exception)))
 
 
 (defn start-server []
