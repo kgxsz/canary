@@ -3,16 +3,17 @@
             [taoensso.faraday :as faraday]))
 
 
+(defn query-profile [user-id]
+  (let [query {:partition (str "profile:" user-id)}
+        {profile :data} (faraday/get-item db/config :canary query)]
+    profile))
+
+
 (defmulti handle first)
 
 
-(defmethod handle :profile [[_ {:keys [user current-user-id]}]]
-  {:profile "hey"}
-  #_{:profile (faraday/get-item
-             db/config
-             :canary
-             {:partition (str user ":profile")
-              :sort 123456})})
+(defmethod handle :profile [[_ {:keys [current-user-id]}]]
+  {:profile (query-profile current-user-id)})
 
 
 (defmethod handle :authorisation-details [query]
