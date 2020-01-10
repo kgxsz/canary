@@ -5,6 +5,7 @@
                  [metosin/muuntaja "0.6.6"]
                  [medley "1.2.0"]
                  [clj-http "3.10.0"]
+                 [clj-time "0.15.2"]
                  [ring/ring-core "1.8.0"]
                  [ring-cors "0.1.13"]]
   :main canary.handler
