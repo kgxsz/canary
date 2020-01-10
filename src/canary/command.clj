@@ -1,19 +1,27 @@
 (ns canary.command
   (:require [canary.db :as db]
+            [canary.query :as query]
             [taoensso.faraday :as faraday]
             [muuntaja.core :as muuntaja]
-            [clj-http.client :as client]))
+            [clj-http.client :as client]
+            [clj-time.core :as time]))
 
 
 (defmulti handle first)
 
 
-(defmethod handle :add-profile [[_ {:keys [user profile]}]]
-  (let [item {:partition (str user ":profile")
-              :sort 123456
-              :profile profile}]
-    (faraday/put-item db/config :canary item)
-    {}))
+(defmethod handle :add-profile [[_ {:keys [user]}]]
+  (let [now (time.coerce/to-long (time/now))
+        item {:partition (str "profile:" (:id user))
+              :data {:user-id (:id user)
+                     :handle (:login user)
+                     :email (:email user)
+                     :name (:name user)
+                     :avatar (:avatar_url user)
+                     :location (:location user)
+                     :created-at now
+                     :last-authorised now}}]
+    (faraday/put-item db/config :canary item)))
 
 
 (defmethod handle :authorise [[_ {:keys [code]}]]
@@ -30,14 +38,9 @@
         {:keys [body]} (client/get
                         "https://api.github.com/user"
                         {:headers {:authorization (format "token %s" access-token)}})
-        user (muuntaja/decode "application/json" body)
-        item {:partition (str (:login user) ":user")
-              :sort 1234567
-              :user {:id (:id user)
-                     :name (:login user)
-                     :created-at 1234567}}]
-    #_(faraday/put-item db/config :canary item)
-    {:current-user-id (:id user)}))
+        {user-id :id} (muuntaja/decode "application/json" body)
+        profile (query/query-profile user-id)]
+    {:current-user-id (when (some? profile) user-id)}))
 
 
 (defmethod handle :deauthorise [command]
