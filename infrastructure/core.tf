@@ -333,15 +333,9 @@ resource "aws_dynamodb_table" "table" {
   read_capacity  = 1
   write_capacity = 1
   hash_key       = "partition"
-  range_key      = "sort"
 
   attribute {
     name = "partition"
     type = "S"
-  }
-
-  attribute {
-    name = "sort"
-    type = "N"
   }
 }
