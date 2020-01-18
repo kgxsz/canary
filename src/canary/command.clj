@@ -4,10 +4,15 @@
             [taoensso.faraday :as faraday]
             [muuntaja.core :as muuntaja]
             [clj-http.client :as client]
-            [clj-time.core :as time]))
+            [clj-time.core :as time]
+            [clj-time.coerce :as time.coerce]))
 
 
 (defmulti handle first)
+
+
+(defmethod handle :initialise [[_ _]]
+  {})
 
 
 (defmethod handle :add-profile [[_ {:keys [user]}]]
@@ -21,7 +26,8 @@
                      :location (:location user)
                      :created-at now
                      :last-authorised now}}]
-    (faraday/put-item db/config :canary item)))
+    (faraday/put-item db/config :canary item)
+    {}))
 
 
 (defmethod handle :authorise [[_ {:keys [code]}]]
