@@ -11,10 +11,6 @@
 (defmulti handle first)
 
 
-(defmethod handle :initialise [[_ _]]
-  {})
-
-
 (defmethod handle :add-profile [[_ {:keys [user]}]]
   (let [now (time.coerce/to-long (time/now))
         item {:partition (str "profile:" (:id user))

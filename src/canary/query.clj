@@ -12,8 +12,12 @@
 (defmulti handle first)
 
 
-(defmethod handle :profile [[_ {:keys [user-id]}]]
-  {:profile (query-profile user-id)})
+(defmethod handle :profile [[_ {:keys [user-id current-user-id]}]]
+  {:profile (query-profile (or user-id current-user-id))})
+
+
+(defmethod handle :grids [[_ {:keys [user-id current-user-id]}]]
+  {:grids []})
 
 
 (defmethod handle :authorisation-details [query]
