@@ -4,20 +4,26 @@
 
 
 (defn query-profile [user-id]
-  (let [query {:partition (str "profile:" user-id)}
-        {profile :data} (faraday/get-item db/config :canary query)]
-    profile))
+  (let [query {:partition (str "profile:" user-id)}]
+    (:data (faraday/get-item db/config :canary query))))
+
+
+(defn query-grids [user-id]
+  (let [query {:partition (str "grids:" user-id)}]
+    (:data (faraday/get-item db/config :canary query))))
 
 
 (defmulti handle first)
 
 
 (defmethod handle :profile [[_ {:keys [user-id current-user-id]}]]
-  {:profile (query-profile (or user-id current-user-id))})
+  (let [user-id (or user-id current-user-id)]
+    {:profile {user-id (query-profile user-id)}}))
 
 
 (defmethod handle :grids [[_ {:keys [user-id current-user-id]}]]
-  {:grids []})
+  (let [user-id (or user-id current-user-id)]
+    {:grids {user-id (query-grids user-id)}}))
 
 
 (defmethod handle :authorisation-details [query]
