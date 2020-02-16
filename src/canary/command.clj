@@ -25,37 +25,8 @@
 
 (defn update-grids [user-id grids]
   (let [partition (str "grids:" user-id)]
-    (faraday/put-item db/config :canary {:partition partition
-                                         :data grids})))
+    (faraday/put-item db/config :canary {:partition partition :data grids})))
 
-
-#_(defn add-grids [id]
-  (let [item {:partition (str "grids:" id)
-              :data [(let [{:keys [checked-dates]} (faraday/get-item db/config :sparrow-calendars {:id 1})]
-                       {:title "Exercise"
-                        :subtitle "weights or cardio, at least half an hour"
-                        :checked-dates (into #{} checked-dates)})
-                     (let [{:keys [checked-dates]} (faraday/get-item db/config :sparrow-calendars {:id 2})]
-                       {:title "Eating"
-                        :subtitle "maintain a balanced diet"
-                        :checked-dates (into #{} checked-dates)})
-                     (let [{:keys [checked-dates]} (faraday/get-item db/config :sparrow-calendars {:id 3})]
-                       {:title "Meditation"
-                        :subtitle "at least ten minutes"
-                        :checked-dates (into #{} checked-dates)})
-                     (let [{:keys [checked-dates]} (faraday/get-item db/config :sparrow-calendars {:id 4})]
-                       {:title "Projects"
-                        :subtitle "a bit of coding or design work"
-                        :checked-dates (into #{} checked-dates)})
-                     (let [{:keys [checked-dates]} (faraday/get-item db/config :sparrow-calendars {:id 5})]
-                       {:title "Journaling"
-                        :subtitle "some writing or drawing"
-                        :checked-dates (into #{} checked-dates)})
-                     (let [{:keys [checked-dates]} (faraday/get-item db/config :sparrow-calendars {:id 6})]
-                       {:title "Reading"
-                        :subtitle "book, podcast, or audiobook"
-                        :checked-dates (into #{} checked-dates)})]}]
-    (faraday/put-item db/config :canary item)))
 
 (defmulti handle first)
 
@@ -89,7 +60,8 @@
         path [i :checked-dates]
         checked-dates (get-in grids path)
         operation (if (contains? checked-dates checked-date) disj conj)]
-    (update-grids current-user-id (update-in grids path operation checked-date))
+    (when (some? current-user-id)
+      (update-grids current-user-id (update-in grids path operation checked-date)))
     {}))
 
 
