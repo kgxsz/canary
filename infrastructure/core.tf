@@ -5,6 +5,7 @@ variable "authorisation_client_id" { default = "db25cb77a169c3b6565f" }
 variable "authorisation_client_secret" {}
 variable "cookie_store_key" {}
 variable "cookie_attribute_domain" { default = ".kaizen.keigo.io" }
+variable "cookie_attribute_secure" { default = "true" }
 variable "cors_origin" { default = "https://kaizen.keigo.io" }
 
 # Provider
@@ -38,7 +39,7 @@ resource "aws_iam_policy" "lambda_policy" {
   "Statement": [
     {
       "Action": [
-        "logs:CreateLogGroup",
+        "logs:CreateLogGroup"
         "logs:CreateLogStream",
         "logs:PutLogEvents"
       ],
@@ -113,6 +114,7 @@ resource "aws_lambda_function" "lambda" {
       AUTHORISATION_CLIENT_SECRET = var.authorisation_client_secret
       COOKIE_STORE_KEY = var.cookie_store_key
       COOKIE_ATTRIBUTE_DOMAIN = var.cookie_attribute_domain
+      COOKIE_ATTRIBUTE_SECURE = var.cookie_attribute_secure
       CORS_ORIGIN = var.cors_origin
     }
   }

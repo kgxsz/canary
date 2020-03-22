@@ -7,6 +7,7 @@
   - `AUTHORISATION_CLIENT_ID` as that provided by Github.
   - `AUTHORISATION_CLIENT_SECRET` as that provided by Github.
   - `COOKIE_STORE_KEY` as a 16 byte secret key.
+  - `COOKIE_ATTRIBUTE_SECURE` as `false`.
   - `CORS_ORIGIN` as `http://localhost:8080`.
 - Kick off a repl from the command line: `clj -A:nrepl`.
 - Connect from within emacs: `C-c M-c`.

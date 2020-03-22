@@ -59,7 +59,7 @@
                    :path "/"
                    :http-only true
                    :same-site :none
-                   :secure true}
+                   :secure (Boolean/parseBoolean (System/getenv "COOKIE_ATTRIBUTE_SECURE"))}
     :store (cookie/cookie-store {:key (System/getenv "COOKIE_STORE_KEY")})}))
 
 
