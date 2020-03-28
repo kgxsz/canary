@@ -17,13 +17,15 @@
 
 
 (defmethod handle :profile [[_ {:keys [user-id current-user-id]}]]
-  (let [user-id (or user-id current-user-id)]
-    {:profile {user-id (query-profile user-id)}}))
+  (if-let [user-id (or user-id current-user-id)]
+    {:profile {user-id (query-profile user-id)}}
+    {:profile {}}))
 
 
 (defmethod handle :grids [[_ {:keys [user-id current-user-id]}]]
-  (let [user-id (or user-id current-user-id)]
-    {:grids {user-id (query-grids user-id)}}))
+  (if-let [user-id (or user-id current-user-id)]
+    {:grids {user-id (query-grids user-id)}}
+    {:grids {}}))
 
 
 (defmethod handle :authorisation-details [query]
