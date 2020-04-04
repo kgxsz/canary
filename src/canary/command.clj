@@ -24,8 +24,9 @@
 
 
 (defn update-grids [user-id grids]
-  (let [partition (str "grids:" user-id)]
-    (faraday/put-item db/config :canary {:partition partition :data grids})))
+  (let [partition (str "grids:" user-id)
+        data (mapv #(update % :checked-dates vec) grids)]
+    (faraday/put-item db/config :canary {:partition partition :data data})))
 
 
 (defmulti handle first)

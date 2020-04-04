@@ -9,8 +9,9 @@
 
 
 (defn query-grids [user-id]
-  (let [query {:partition (str "grids:" user-id)}]
-    (:data (faraday/get-item db/config :canary query))))
+  (let [query {:partition (str "grids:" user-id)}
+        {:keys [data]} (faraday/get-item db/config :canary query)]
+    (mapv #(update % :checked-dates set) data)))
 
 
 (defmulti handle first)
