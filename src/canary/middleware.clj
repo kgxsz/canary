@@ -54,7 +54,7 @@
   (session.middleware/wrap-session
    handler
    {:cookie-name "session"
-    :cookie-attrs {:max-age 300 ;; 604800 ;; one week
+    :cookie-attrs {:max-age 604800 ;; one week
                    :domain (System/getenv "COOKIE_ATTRIBUTE_DOMAIN")
                    :path "/"
                    :http-only true
