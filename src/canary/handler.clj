@@ -5,7 +5,7 @@
             [ring.util.response :as response]
             [medley.core :as medley]
             [muuntaja.core :as muuntaja])
-  (:import [com.amazonaws.services.lambda.runtime.RequestStreamHandler]
+  (:import [com.amazonaws.services.lambda.runtime RequestStreamHandler]
            [java.io ByteArrayInputStream ByteArrayOutputStream])
   (:gen-class
    :name canary.Handler
