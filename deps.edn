@@ -1,4 +1,6 @@
-{:deps {ring/ring-core {:mvn/version "1.8.0"}
+{:deps {org.clojure/clojure {:mvn/version "1.10.1"}
+        com.amazonaws/aws-lambda-java-core {:mvn/version "1.1.0"}
+        ring/ring-core {:mvn/version "1.8.0"}
         ring/ring-jetty-adapter {:mvn/version "1.8.0"}
         ring-cors {:mvn/version "0.1.13"}
         metosin/muuntaja {:mvn/version "0.6.6"}
@@ -6,9 +8,15 @@
         com.taoensso/faraday {:mvn/version "1.9.0"}
         medley {:mvn/version "1.2.0"}
         clj-time {:mvn/version "0.15.2"}}
+ :mvn/repos {"central" {:url "http://central.maven.org/maven2/"}
+             "clojars" {:url "https://repo.clojars.org/"}}
  :aliases {:nrepl {:extra-deps {cider/cider-nrepl {:mvn/version "0.22.0-beta8"}
                                 refactor-nrepl {:mvn/version "2.5.0-SNAPSHOT"}}
                    :main-opts ["-m"
                                "nrepl.cmdline"
                                "--middleware"
-                               "[cider.nrepl/cider-middleware,refactor-nrepl.middleware/wrap-refactor]"]}}}
+                               "[cider.nrepl/cider-middleware,refactor-nrepl.middleware/wrap-refactor]"]}
+           :uberjar {:extra-deps {luchiniatwork/cambada {:mvn/version "1.0.2"}}
+                     :main-opts ["-m" "cambada.uberjar"
+                                 "--main" "canary.handler"
+                                 "--app-version" "1.0.0"]}}}
