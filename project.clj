@@ -1,6 +1,6 @@
-(defproject canary "0.0.1-SNAPSHOT"
-  :dependencies [[org.clojure/clojure "1.9.0"]
-                 [com.amazonaws/aws-lambda-java-core "1.0.0"]
+(defproject canary "1.0.0"
+  :dependencies [[org.clojure/clojure "1.10.1"]
+                 [com.amazonaws/aws-lambda-java-core "1.1.0"]
                  [com.taoensso/faraday "1.9.0"]
                  [metosin/muuntaja "0.6.6"]
                  [medley "1.2.0"]
@@ -10,6 +10,6 @@
                  [ring-cors "0.1.13"]]
   :main canary.handler
   :target-path "target/"
-  :uberjar-name "canary.jar"
+  :uberjar-name "canary-1.0.0-standalone.jar"
   :source-paths ["src"]
   :profiles {:uberjar {:aot :all}})
