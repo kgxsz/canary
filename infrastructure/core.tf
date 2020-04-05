@@ -22,9 +22,9 @@ resource "aws_s3_bucket" "bucket" {
 resource "aws_s3_bucket_object" "uberjar" {
   bucket = "api.${var.project}.keigo.io"
   depends_on = [aws_s3_bucket.bucket]
-  key = "${var.project}.jar"
-  source = "target/${var.project}.jar"
-  etag = filemd5("target/${var.project}.jar")
+  key = "${var.project}-1.0.0-standalone.jar"
+  source = "target/${var.project}-1.0.0-standalone.jar"
+  etag = filemd5("target/${var.project}-1.0.0-standalone.jar")
 }
 
 # Lambda
@@ -99,12 +99,12 @@ resource "aws_lambda_function" "lambda" {
                 aws_s3_bucket_object.uberjar,
                 aws_iam_policy.lambda_policy]
   s3_bucket          = aws_s3_bucket.bucket.bucket
-  s3_key             = "${var.project}.jar"
+  s3_key             = "${var.project}-1.0.0-standalone.jar"
   function_name      = var.project
   description        = "API for ${var.project}.keigo.io"
   role               = aws_iam_role.lambda_role.arn
   handler            = "${var.project}.Handler"
-  source_code_hash   = base64sha256("target/${var.project}.jar")
+  source_code_hash   = base64sha256("target/${var.project}-1.0.0-standalone.jar")
   runtime            = "java8"
   timeout            = 100
   memory_size        = 512
